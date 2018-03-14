@@ -1,6 +1,6 @@
 import sys , os
 from PyQt5.QtWidgets import QApplication,  QPushButton,  QGroupBox, QDialog, QVBoxLayout, \
-    QGridLayout,QComboBox, QRadioButton
+    QGridLayout,QComboBox, QRadioButton,QLineEdit
 from PyQt5.QtGui import QIcon
 #
 from sklearn.metrics import roc_curve, auc
@@ -43,7 +43,7 @@ class App(QDialog):
         self.target_list.addItem('CDK5')
         self.target_list.addItem('GSK3b')
         self.target_list.addItem('CK1')
-        self.target_list.addItem('DYK1a')
+        self.target_list.addItem('DYRK1a')
 
         #trg_lst = get_target
 
@@ -51,16 +51,24 @@ class App(QDialog):
         self.method_list.addItem('Select Method',None)
 
         self.plot_button = QPushButton('Plot')
+        self.fig_button = QPushButton('New Figure')
         self.invert_opt = QRadioButton('Invert ROC plot')
+        self.exp_value  = QLineEdit('Exp value')
+        self.clear_plot = QPushButton('Clear Plot')
         self.populate_methods()
 
         layout.addWidget(self.target_list, 0, 0)
         layout.addWidget(self.method_list, 1, 0)
         layout.addWidget(self.plot_button, 1, 1)
         layout.addWidget(self.invert_opt, 0, 1)
+        layout.addWidget(self.exp_value,2,0)
+        layout.addWidget(self.clear_plot, 2, 1)
+        #layout.addWidget(self.fig_button, 0, 2)
 
 
         self.plot_button.clicked.connect(self.plot_fig)
+        self.clear_plot.clicked.connect(self.clear_fig)
+        self.fig_button.clicked.connect(self.new_fig)
         self.target_list.currentIndexChanged.connect(self.selectionchange)
         self.horizontalGroupBox.setLayout(layout)
 
@@ -70,16 +78,26 @@ class App(QDialog):
         mthds = get_targets_methods()
         for mtd, idx in zip(mthds,range (len(mthds))):
             self.method_list.addItem(mtd,idx)
+    def clear_fig(self):
+        cear_plot_fig()
 
-
+    def new_fig(self):
+        new_fig_mpl()
 
     def plot_fig(self):
         #if self.target_list.currentData() != None:
         method = self.method_list.currentData()
         target = self.target_list.currentText()
-        if method != None:
+        if method != None and 'Exponential Mean' != self.method_list.currentText() and 'Mean' != self.method_list.currentText() :
             plot_remote(target, method , self.invert_opt.isChecked())
             plot_remote_show()
+        if self.method_list.currentText() == 'Mean':
+            get_mean_roc(target,self.invert_opt.isChecked())
+            plot_remote_show()
+        if self.method_list.currentText() == 'Exponential Mean':
+            get_mean_exp_roc(target,self.invert_opt.isChecked(),float(self.exp_value.text()))
+            plot_remote_show()
+
 
     def selectionchange(self, i):
         print ("Items in the list are :")

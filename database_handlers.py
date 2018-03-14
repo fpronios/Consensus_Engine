@@ -28,6 +28,7 @@ def df_to_numpy(df):
 
     X = np_arr[:, 1:np_arr.shape[1] - 1]
     Y = np_arr[:, np_arr.shape[1] - 1]
+    X[X == 0] = 1500
     return X, Y,np_arr
 
 #xls2db("excel_source/Consensus_full.xls", "consensus.db")
@@ -88,6 +89,61 @@ dfa = pd.read_sql_query("SELECT * FROM "+target+"_active", conn)
 # print(df)
 active_araray = dfa.as_matrix(columns=['Active'])
 
+def roc_calculator_mean(X,Y,target ,method = 0, invert = True):
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+
+    y = label_binarize(Y, classes=[0,1])
+    n_classes = y.shape[1]
+
+    method_names = list(df.columns.values)
+    print(method_names)
+    print('Classes: ', n_classes)
+    #method = 22
+
+    X [X==0] = 2000
+
+    perm = X[:,method+1].argsort()
+    #print(perm)
+    #perm = np.flip(perm,axis=0)
+    #print(perm)
+    y1 = y[perm,0]
+    x = X[perm, method+1]
+
+    #print(np.where(y == 1))
+
+    if not invert:
+        for i in range(n_classes):
+            #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
+            fpr[i], tpr[i], _ = roc_curve(y1, -x)
+            roc_auc[i] = auc(fpr[i], tpr[i])
+    else:
+        for i in range(n_classes):
+            #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
+            fpr[i], tpr[i], _ = roc_curve(y1, x)
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+    fpr["micro"], tpr["micro"], _ = roc_curve(y1.ravel(),x.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+    #print(fpr)
+
+    plt.figure(figsize=(8, 7))
+    lw = 2
+    plt.plot(fpr[0], tpr[0], color='darkorange',
+             lw=lw, label='  ROC curve (area = %0.2f)' % roc_auc[0])
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([-0.00, 1.005])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC '+target+' '+ method_names[method+2])
+    plt.legend(loc="lower right")
+    #plt.show()
+    #plt.savefig('ROC_plots/'+target+ method_names[method+2]+'.png')
+
+    return roc_auc[0]
 
 def roc_calculator(X,Y,target ,method = 0, invert = True):
     fpr = dict()
@@ -206,5 +262,125 @@ def get_targets_methods(target = 'CK1'):
     df = pd.read_sql_query("SELECT * FROM " + target + " LEFT JOIN " + target + "_active ON molecule = active", conn)
     method_names = list(df.columns.values)
     conn.close()
+    method_names = method_names[2:-2]
+    method_names.append('Mean')
+    method_names.append('Exponential Mean')
+    return method_names
 
-    return method_names[2:]
+def get_mean_roc(target = 'CK1' ,invert = True):
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+
+    conn = sqlite3.connect('consensus.db')
+    df = pd.read_sql_query("SELECT * FROM " + target + " LEFT JOIN " + target + "_active ON molecule = active", conn)
+
+    X, Y, np_arr = df_to_numpy(df)
+
+    dfa = pd.read_sql_query("SELECT * FROM " + target + "_active", conn)
+
+    mean_X = np.mean(X, axis=1)
+
+    perm = mean_X.argsort()
+    y = label_binarize(Y, classes=[0, 1])
+    n_classes = y.shape[1]
+
+    y2 = y[perm, 0]
+    x = mean_X[perm]
+
+    if not invert:
+        for i in range(n_classes):
+            #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
+            fpr[i], tpr[i], _ = roc_curve(y2, -x)
+            roc_auc[i] = auc(fpr[i], tpr[i])
+    else:
+        for i in range(n_classes):
+            #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
+            fpr[i], tpr[i], _ = roc_curve(y2, x)
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+    fpr["micro"], tpr["micro"], _ = roc_curve(y2.ravel(), mean_X.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+    # print(fpr)
+
+    plt.figure(2, figsize=(8, 7))
+    lw = 2
+    plt.plot(fpr[0], tpr[0], #color='darkorange',
+             lw=lw, label='Mean '+target + '  ROC curve (area = %0.2f)' % roc_auc[0])
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([-0.005, 1.005])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Cumulative (mean) ' + target)
+    plt.legend(loc="lower right")
+
+    conn.close()
+    # print(fpr)
+    plt.show()
+
+
+
+def get_mean_exp_roc(target  ,invert  , exp_val):
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+
+    conn = sqlite3.connect('consensus.db')
+    df = pd.read_sql_query("SELECT * FROM " + target + " LEFT JOIN " + target + "_active ON molecule = active", conn)
+
+    X, Y, np_arr = df_to_numpy(df)
+
+    dfa = pd.read_sql_query("SELECT * FROM " + target + "_active", conn)
+
+    X = np.power(X , exp_val)
+
+    mean_X = np.mean(X, axis=1)
+
+    perm = mean_X.argsort()
+    y = label_binarize(Y, classes=[0, 1])
+    n_classes = y.shape[1]
+
+    y2 = y[perm, 0]
+    x = mean_X[perm]
+
+    if not invert:
+        for i in range(n_classes):
+            #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
+            fpr[i], tpr[i], _ = roc_curve(y2, -x)
+            roc_auc[i] = auc(fpr[i], tpr[i])
+    else:
+        for i in range(n_classes):
+            #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
+            fpr[i], tpr[i], _ = roc_curve(y2, x)
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+    fpr["micro"], tpr["micro"], _ = roc_curve(y2.ravel(), mean_X.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+    # print(fpr)
+
+    plt.figure(2, figsize=(8, 7))
+    lw = 2
+    plt.plot(fpr[0], tpr[0], #color='darkorange',
+             lw=lw, label='Exp_Mean('+str(exp_val)+') '+target + '  ROC curve (area = %0.2f)' % roc_auc[0])
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([-0.005, 1.005])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Cumulative (mean) ' + target)
+    plt.legend(loc="lower right")
+
+    conn.close()
+    # print(fpr)
+    plt.show()
+
+def new_fig_mpl():
+    plt.figure()
+
+
+def cear_plot_fig():
+    plt.gcf().clf()
+    plt.show()
