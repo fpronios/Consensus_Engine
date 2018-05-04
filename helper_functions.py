@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication,  QPushButton,  QGroupBox, QDialog, QVB
 from PyQt5.QtGui import QIcon
 #
 from sklearn.metrics import roc_curve, auc
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from sklearn.preprocessing import label_binarize
 from database_handlers import *
 
@@ -54,6 +54,7 @@ class App(QDialog):
         self.fig_button = QPushButton('New Figure')
         self.invert_opt = QCheckBox('Invert ROC plot')
         self.new_window = QCheckBox('Plot on new')
+        self.weighted = QCheckBox('weighted ')
         self.exp_value  = QLineEdit('1.0')
         self.best_auc = QLineEdit('10')
         self.clear_plot = QPushButton('Clear Plot')
@@ -68,6 +69,7 @@ class App(QDialog):
         layout.addWidget(self.exp_value,2,0)
         layout.addWidget(self.clear_plot, 2, 2)
         layout.addWidget(self.new_window, 1, 3)
+        layout.addWidget(self.weighted, 1, 4)
         layout.addWidget(self.best_roc, 2, 3)
         layout.addWidget(self.best_auc, 2, 4)
 
@@ -82,8 +84,9 @@ class App(QDialog):
         self.horizontalGroupBox.setLayout(layout)
 
     def plot_best_roc(self):
-        find_best_auc(self.target_list.currentText(),self.invert_opt.isChecked(),float(self.exp_value.text()),int(self.best_auc.text()))
+        #find_best_auc(self.target_list.currentText(),self.invert_opt.isChecked(),float(self.exp_value.text()),int(self.best_auc.text()))
         #cumulative_best_roc()
+        calculate_enrichment_factors()
 
 
     def populate_methods(self):
@@ -113,14 +116,15 @@ class App(QDialog):
                 plot_remote_v2(target, method , self.invert_opt.isChecked())
                 plot_remote_show()
         if self.method_list.currentText() == 'Mean':
-            get_mean_roc(target,self.invert_opt.isChecked())
+            get_mean_roc(target,self.invert_opt.isChecked(),self.weighted.isChecked())
             plot_remote_show()
         if self.method_list.currentText() == 'Exponential Mean':
-            get_mean_exp_roc(target,self.invert_opt.isChecked(),float(self.exp_value.text()))
+            get_mean_exp_roc(target,self.invert_opt.isChecked(),float(self.exp_value.text()),self.weighted.isChecked())
             plot_remote_show()
         if 'Linear Reduction Mean' == self.method_list.currentText():
-            get_mean_exp_roc_v2(target, self.invert_opt.isChecked(), float(self.exp_value.text()))
-            plot_remote_show()
+            #get_mean_exp_roc_v2(target, self.invert_opt.isChecked(), float(self.exp_value.text()))
+            #plot_remote_show()
+            calculate_enrichment_factors()
 
     def selectionchange(self, i):
         print ("Items in the list are :")

@@ -505,7 +505,7 @@ def get_mean_roc(target = 'CK1' ,invert = True , weighted = True):
 
     conn.close()
     # print(fpr)
-    plt.show()
+    #plt.show()
     return roc_auc[0], ef
 
 
@@ -777,10 +777,10 @@ def get_mean_exp_roc_num(target  ,invert  , exp_val, weighted = True):
         var = np.var(X, axis=1)
 
     if invert:
-        perm = mean_X.argsort()
+        perm = np.mean(X[:, 0:16], axis=1).argsort()
         perm = np.flip(perm, axis=0)
     else:
-        perm = mean_X.argsort()
+        perm = np.mean(X[:, 0:16], axis=1).argsort()
 
     res_cons = np.zeros(len(np_arr[perm, 0]))
 
