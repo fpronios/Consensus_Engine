@@ -1314,8 +1314,8 @@ def plot_res(target , method_used, x, y,RMS , is_method = False):
     #plt.plot([0, np.max(x)], [0, np.max(x)], color='navy', lw=1, linestyle='--')
 
     plt.scatter(x,y, lw=0.01, label='Residual  (RMS = %0.2f)' % RMS , s = 5)
-    plt.plot(x, regr, color='red', lw=2, linestyle='--',
-             label='Regression line y = %0.2f * x  %0.2f' % (slope, intercept))
+    #plt.plot(x, regr, color='red', lw=2, linestyle='--',
+     #        label='Regression line y = %0.2f * x  %0.2f' % (slope, intercept))
     plt.legend(loc="lower right")
     plt.title('Residual of %s for: %s' % (method_used,target))
     plt.ylabel('Experimental - Predicted Position')
@@ -1389,7 +1389,7 @@ def plot_roc_with_std(target , method_used, fpr,tpr, std_tot ):
 
 calculate_enrichment_factors()
 
-input('Clculated EF')
+
 targets = ['CK1','DYRK1a','CDK5','GSK3b']
 #targets = ['CDK5','DYRK1a']
 
@@ -1523,7 +1523,7 @@ for (t, list_index) in zip(targets,range(len(targets))):
 
     #tprs.append(interp(mean_fpr, fpr, tpr))
 
-    for i in range(44):
+    for i in range(1):
 
         perm = X[:, i + 1].argsort()
         x, y ,rms = get_residues(t,np_arr[perm, 0],Y)
