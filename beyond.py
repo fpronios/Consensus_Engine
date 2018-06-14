@@ -22,7 +22,7 @@ from sklearn.preprocessing import label_binarize
 import xlsxwriter
 np.random.seed(7)
 
-
+np.seterr(all='ignore')#,over = 'ignore',invalid='ignore')
 
 def df_to_numpy(df):
     np_arr = df.as_matrix()
@@ -58,8 +58,8 @@ active_araray = dfa.as_matrix(columns=['Active'])
 #plt.style.use('seaborn-paper')
 #
 #print(plt.style.available)
-workbook2 = xlsxwriter.Workbook('roc_axes.xlsx')
-worksheet2 = workbook2.add_worksheet()
+#workbook2 = xlsxwriter.Workbook('roc_axes.xlsx')
+#worksheet2 = workbook2.add_worksheet()
 
 
 
@@ -79,7 +79,7 @@ def roc_calculator_mean(X,Y,target ,method = 0, invert = True ):
     #print('Classes: ', n_classes)
     #method = 22
 
-    X [X==0] = pos_penalty + random.randint(1,2550)
+    X [X==0] = pos_penalty #+ random.randint(1,2550)
 
     perm = X[:,method+1].argsort()
     #print(perm)
@@ -139,7 +139,7 @@ def roc_calculator(X,Y,target ,method = 0, invert = True):
     #print('Classes: ', n_classes)
     #method = 22
 
-    X [X==0] = pos_penalty + random.randint(1,2550)
+    X [X==0] = pos_penalty #+ random.randint(1,2550)
 
     perm = X[:,method+1].argsort()
     #print(perm)
@@ -199,7 +199,7 @@ def roc_calculator_num(X,Y,target ,method = 0, invert = True):
     #print('Classes: ', n_classes)
     #method = 22
 
-    X [X==0] = pos_penalty + random.randint(1,2550)
+    X [X==0] = pos_penalty #+ random.randint(1,2550)
 
     perm = X[:,method+1].argsort()
     #print(perm)
@@ -244,7 +244,7 @@ def roc_calculator_num_v2(X,Y,target ,method = 0, invert = True):
     #print('Classes: ', n_classes)
     #method = 22
 
-    X [X==0] = pos_penalty + random.randint(1,2550)
+    X [X==0] = pos_penalty #+ random.randint(1,2550)
 
     perm = X[:,method+1].argsort()
 
@@ -316,7 +316,7 @@ def roc_calculator_v2(X,Y,target ,method = 0, invert = True):
    # print('Classes: ', n_classes)
     #method = 22
 
-    X [X==0] = pos_penalty + random.randint(1,2550)
+    X [X==0] = pos_penalty #+ random.randint(1,2550)
 
     perm = X[:,method+1].argsort()
     #print(perm)
@@ -505,7 +505,7 @@ def get_mean_roc(target = 'CK1' ,invert = True , weighted = True):
 
     conn.close()
     # print(fpr)
-    #plt.show()
+    plt.show()
     return roc_auc[0], ef
 
 
@@ -708,7 +708,7 @@ def roc_area_calculator(X,Y,target ,method = 0, invert = True):
     #print('Classes: ', n_classes)
     #method = 22
 
-    X [X==0] = pos_penalty + random.randint(1,2550)
+    X [X==0] = pos_penalty #+ random.randint(1,2550)
 
     perm = X[:,method+1].argsort()
     #print(perm)
@@ -749,10 +749,10 @@ def get_mean_exp_roc_num(target  ,invert  , exp_val, weighted = True):
     dfa = pd.read_sql_query("SELECT * FROM " + target + "_active", conn)
 
     if exp_val < 1.1:
-        print('EXPERIMENTALL !!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@')
+        #print('EXPERIMENTALL !!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@')
         X = np.power(X , exp_val)
     else:
-        print('LOGGGGGGGGGGGGGGGGGGGGGGggggggg !!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@')
+        #print('LOGGGGGGGGGGGGGGGGGGGGGGggggggg !!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@')
         if exp_val > 9.0:
             X = np.log10(X)
         else:
@@ -767,20 +767,20 @@ def get_mean_exp_roc_num(target  ,invert  , exp_val, weighted = True):
         stdev = np.std(tmp_mean.T, axis=1)
         var = np.var(tmp_mean.T, axis=1)
         #print('OK')
-        print('Shapes: ')
-        print(np.shape(X[:, 0:16]))
-        print(np.shape(X[:, 16:20]))
-        print(np.shape(X[:, 20:44]))
+        #print('Shapes: ')
+        #print(np.shape(X[:, 0:16]))
+        #print(np.shape(X[:, 16:20]))
+        #print(np.shape(X[:, 20:44]))
     else:
         mean_X = np.mean(X, axis=1)
         stdev = np.std(X, axis=1)
         var = np.var(X, axis=1)
 
     if invert:
-        perm = np.mean(X[:, 0:16], axis=1).argsort()
+        perm = mean_X.argsort()
         perm = np.flip(perm, axis=0)
     else:
-        perm = np.mean(X[:, 0:16], axis=1).argsort()
+        perm = mean_X.argsort()
 
     res_cons = np.zeros(len(np_arr[perm, 0]))
 
@@ -808,8 +808,8 @@ def get_mean_exp_roc_num(target  ,invert  , exp_val, weighted = True):
     ef = enrichment_factor(y2)
 
     x = mean_X[perm]
-    print("CONSENSUS OUT TO CHECK")
-    print(x)
+    #print("CONSENSUS OUT TO CHECK")
+    #print(x)
     if not invert:
         for i in range(n_classes):
             #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
@@ -872,7 +872,6 @@ def get_residues(target, X, Y ):
     return exper_last_pos , y , RMS
 
 
-
 def get_std_exp_roc_num(target  ,invert  , exp_val, weighted = True , divide = False):
 
     fpr = dict()
@@ -887,13 +886,8 @@ def get_std_exp_roc_num(target  ,invert  , exp_val, weighted = True , divide = F
 
     dfa = pd.read_sql_query("SELECT * FROM " + target + "_active", conn)
 
-    if exp_val < 1.1:
-        X = np.power(X , exp_val)
-    else:
-        if exp_val > 9.0:
-            X = np.log10(X)
-        else:
-            X = np.log(X)
+    X = np.log10(X)
+    #X = np.log(X)
 
     stdev_mean = 0
     stdev_stdev = 0
@@ -913,61 +907,70 @@ def get_std_exp_roc_num(target  ,invert  , exp_val, weighted = True , divide = F
         var = np.var(X, axis=1)
 
 
+
     if divide:
         norm_pow = -6
 
-        tmp1s = np.std(X[:, 0:15], axis=1)
-        #print(np.mean(tmp1s))
-        #tmp1s = np.power(np.subtract(tmp1s, np.mean(tmp1s)),norm_pow)
-        #tmp1s
-        stdev_stdev1 =  np.mean(tmp1s)
+        tmp1s = np.std(X[:, 0:16], axis=1)
+        stdev_stdev1 = np.mean(tmp1s)
 
-        tmp2s = np.std(X[:, 16:19], axis=1)
-        #tmp2s = np.power(np.subtract(tmp2s, np.mean(tmp2s)), norm_pow)
-        stdev_stdev2 = np.mean(tmp1s)
+        tmp2s = np.std(X[:, 16:20], axis=1)
+        stdev_stdev2 = np.mean(tmp2s)
 
-        tmp3s = np.std(X[:, 20:43], axis=1)
-        #tmp3s = np.power(np.subtract(tmp3s, np.mean(tmp3s)), norm_pow)
-        stdev_stdev3 = np.mean(tmp1s)
+        tmp3s = np.std(X[:, 20:44], axis=1)
+        stdev_stdev3 = np.mean(tmp3s)
 
-        tmp1m = np.mean(X[:, 0:15], axis=1)
+        tmp1m = np.mean(X[:, 0:16], axis=1)
 
-        tmp2m = np.mean(X[:, 16:19], axis=1)
+        tmp2m = np.mean(X[:, 16:20], axis=1)
 
-        tmp3m = np.mean(X[:, 20:43], axis=1)
+        tmp3m = np.mean(X[:, 20:44], axis=1)
+
+
+
+
+        tmp1skew = stats.skew(X[:, 0:16], axis=1)
+        tmp2skew = stats.skew(X[:, 16:20], axis=1)
+        tmp3skew = stats.skew(X[:, 20:44], axis=1)
+
         stdev_mean = np.mean(np.mean(np.vstack((tmp1m, tmp2m, tmp3m)).T, axis=1))
         stdev_stdev = np.mean(np.mean(np.vstack((tmp1s, tmp2s, tmp3s)).T, axis=1))
 
         norm_factor= stdev_mean/stdev_stdev
 
-       # print(np.mean(tmp1m))
-        #tmp1s[tmp1s == 0] = 0.1
-        #tmp2s[tmp2s == 0] = 0.1
-        #tmp2s[tmp2s == 0] = 0.1
-        """
-        tmp1 = np.add(tmp1s*norm_factor, tmp1m)
-        tmp2 = np.add(tmp2s*norm_factor, tmp2m)
-        tmp3 = np.add(tmp3s*norm_factor, tmp3m)
-        """
-        stdev_stdev1,stdev_stdev1,stdev_stdev1 = 0,0,0
-        tmp1 = np.divide(tmp1m,(tmp1s-stdev_stdev1) ** -1)
-        tmp2 = np.divide(tmp2m,(tmp2s-stdev_stdev2) ** -1)
-        tmp3 = np.divide(tmp3m,(tmp3s-stdev_stdev3) ** -1)
+        # Here the magic happens
+        #stdev_stdev1,stdev_stdev2,stdev_stdev3 = 0,0,0
+        #print(stats.describe(tmp1m))
+        #print(stats.describe(tmp2m))
+        #print(stats.describe(tmp3m))
+        #print(stats.describe(tmp1s))
+        #print(stats.describe(tmp2s))
+        #print(stats.describe(tmp3s))
+        tmp1s[tmp1s == 0] = 0.001
+        tmp2s[tmp2s == 0] = 0.001
+        tmp3s[tmp3s == 0] = 0.001
+        tmp1skew[tmp2skew == 0] = 0.001
+        tmp2skew[tmp2skew == 0] = 0.001
+        tmp2skew[tmp2skew == 0] = 0.001
+        coeffv1 = tmp1m / tmp1s
+        coeffv2 = tmp2m / tmp2s
+        coeffv3 = tmp3m / tmp3s
+        tmp1 = np.add(tmp1m , coeffv1)
+        tmp2 = np.add(tmp2m , coeffv2)
+        tmp3 = np.add(tmp3m , coeffv3)
+
+
+        #tmp1, tmp2, tmp3 = tmp1s, tmp2s, tmp3s
+        #print(stats.describe(tmp1m))
+        #print(stats.describe(tmp2m))
+        #print(stats.describe(tmp3m))
+        #print(stats.describe(tmp1s))
+        #print(stats.describe(tmp1))
 
         tmp_mean = np.vstack((tmp1, tmp2, tmp3))
 
         mean_X = np.mean(tmp_mean.T, axis=1)
 
-        stdev_mean = np.mean(np.mean(np.vstack((tmp1m, tmp2m, tmp3m)).T, axis=1))
-        stdev_stdev = np.mean(np.mean(np.vstack((tmp1s, tmp2s, tmp3s)).T, axis=1))
-       # print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        #print(stdev_mean)
-        #print(stdev_stdev)
-        #perm = mean_X.argsort()
-        #print(X[0])
-        #print(X2)
-        #print(np_arr[:,0])
-        #print(np_arr[perm,0])
 
     if invert:
         perm = mean_X.argsort()
@@ -1000,8 +1003,9 @@ def get_std_exp_roc_num(target  ,invert  , exp_val, weighted = True , divide = F
     #ef = enrichment_factor(y2)
 
     x = mean_X[perm]
-    #print(x.shape)
-    #print(y2.shape)
+    ##print("****************")
+    #print(stats.describe(x))
+    #print(stats.describe(y2))
     if not invert:
         for i in range(n_classes):
             #fpr[i], tpr[i], _ = roc_curve(y[:, i], X[:, 4])
@@ -1314,8 +1318,8 @@ def plot_res(target , method_used, x, y,RMS , is_method = False):
     #plt.plot([0, np.max(x)], [0, np.max(x)], color='navy', lw=1, linestyle='--')
 
     plt.scatter(x,y, lw=0.01, label='Residual  (RMS = %0.2f)' % RMS , s = 5)
-    plt.plot(x, regr, color='red', lw=2, linestyle='--',
-             label='Regression line y = %0.2f * x  %0.2f' % (slope, intercept))
+    #plt.plot(x, regr, color='red', lw=2, linestyle='--',
+     #        label='Regression line y = %0.2f * x  %0.2f' % (slope, intercept))
     plt.legend(loc="lower right")
     plt.title('Residual of %s for: %s' % (method_used,target))
     plt.ylabel('Experimental - Predicted Position')
@@ -1387,267 +1391,25 @@ def plot_roc_with_std(target , method_used, fpr,tpr, std_tot ):
     return mean_fpr, mean_tpr ,mean_auc
 
 
-calculate_enrichment_factors()
+"""
+Mean  -  Coefficient of Variance
+"""
 
-input('Clculated EF')
+
 targets = ['CK1','DYRK1a','CDK5','GSK3b']
-#targets = ['CDK5','DYRK1a']
+for target in targets:
+    roc_auc1, fpr, tpr, stdev_mean , stdev_stdev, res  = get_std_exp_roc_num(target,False,2.9, True, True )
+    plt.plot(fpr, tpr, label = "%s : %0.2f " %(target,roc_auc1,) )
 
-residual_workbook = xlsxwriter.Workbook('excel_out/residuals.xlsx')
-#mpl.style.use('classic')
+    roc_auc2, fpr, tpr, stdev_mean, stdev_stdev, res = get_mean_exp_roc_num(target, False, 5)
+    plt.plot(fpr, tpr, marker = '+',label="%s : %0.2f " % (target, roc_auc2,))
 
-glide_fpr, glide_tpr, glide_auc = [0.0 for i in range(len(targets))] , [0.0 for i in range(len(targets))],[0.0 for i in range(len(targets))]
-vrocs_fpr, vrocs_tpr, vrocs_auc = [0.0 for i in range(len(targets))] , [0.0 for i in range(len(targets))],[0.0 for i in range(len(targets))]
-canvas_fpr, canvas_tpr, canvas_auc = [0.0 for i in range(len(targets))] ,[0.0 for i in range(len(targets))],[0.0 for i in range(len(targets))]
-cons_fpr, cons_tpr, cons_auc = [0.0 for i in range(len(targets))] ,[0.0 for i in range(len(targets))],[0.0 for i in range(len(targets))]
-wcons_fpr, wcons_tpr, wcons_auc = [0.0 for i in range(len(targets))] ,[0.0 for i in range(len(targets))],[0.0 for i in range(len(targets))]
+    print("+-----------------------+")
 
-for (t, list_index) in zip(targets,range(len(targets))):
-    residual_worksheet = residual_workbook.add_worksheet(t)
-    excel_idx = 1
-    residual_worksheet.write(0, 0, 'Method')
-    residual_worksheet.write(0, 1, 'RMSd')
+    print("    Delta: " + target)
+    print("           %0.2f" %(roc_auc1 - roc_auc2 ))
+    print("+-----------------------+")
 
-
-    conn = sqlite3.connect('consensus.db')
-    df = pd.read_sql_query("SELECT * FROM " + t + " LEFT JOIN " + t + "_active ON molecule = active", conn)
-
-    X, Y, np_arr = df_to_numpy(df)
-
-
-    #glide
-    sorted_names , sorted_idx , aggr_fpr , aggr_tpr ,std_roc = find_best_auc(t, False,1.0, 16 , 0)
-
-    glide_fpr[list_index], glide_tpr[list_index], glide_auc[list_index] = plot_roc_with_std(t, 'Glide' , aggr_fpr , aggr_tpr ,std_roc )
-    #best
-    aucb, fprb, tprb , tprc, fprc = roc_calculator_num_v2(X, Y, target, sorted_idx[0], False)
-   # print('Sorted Index', sorted_idx)
-   # print('Sorted Names', sorted_names)
-    #worst
-    aucw, fprw, tprw, tprc, fprc = roc_calculator_num_v2(X, Y, target, sorted_idx[15], False)
-
-
-
-    plt.figure(10+targets.index(t), figsize=(5, 5))
-    lw = 2
-    plt.plot(fprb, tprb, #color='darkorange',
-             lw=lw, label='Best case Glide - %s (area = %0.2f)' % (sorted_names[15],aucb,))
-
-
-    plt.plot(fprw, tprw,  # color='darkorange',
-             lw=lw, label='Worst case Glide - %s (area = %0.2f)' % (sorted_names[0],aucw,))
-
-
-    sorted_names, sorted_idx , aggr_fpr , aggr_tpr ,std_roc = find_best_auc(t, False, 1.0, 20, 16)
-
-    vrocs_fpr[list_index],  vrocs_tpr[list_index],  vrocs_auc[list_index] = plot_roc_with_std(t, 'Vrocs', aggr_fpr, aggr_tpr, std_roc)
-    # best
-    aucb, fprb, tprb , tprc, fprc= roc_calculator_num_v2(X, Y, target, sorted_idx[0], False)
-  #  print('Sorted Index', sorted_idx)
- #   print('Sorted Names', sorted_names)
-    # worst
-    aucw, fprw, tprw , tprc, fprc= roc_calculator_num_v2(X, Y, target, sorted_idx[3], False)
-
-    plt.figure(10 + targets.index(t), figsize=(5, 5))
-    #### GLIDEE
-    plt.plot(fprb, tprb,  # color='darkorange',
-             lw=lw, label='Best case Vrocs - %s (area = %0.2f)' % (sorted_names[3],aucb,))
-
-    plt.plot(fprw, tprw,  # color='darkorange',
-             lw=lw, label='Worst case Vrocs - %s (area = %0.2f)' % (sorted_names[0],aucw,))
-
-
-    sorted_names, sorted_idx, aggr_fpr , aggr_tpr ,std_roc  = find_best_auc(t, False, 1.0, 46, 20)
-
-    canvas_fpr[list_index],  canvas_tpr[list_index],  canvas_auc[list_index] = plot_roc_with_std(t, 'Canvas', aggr_fpr, aggr_tpr, std_roc)
-    # best
-    plt.figure(10 + targets.index(t), figsize=(5, 5))
-    aucb, fprb, tprb , tprc, fprc= roc_calculator_num_v2(X, Y, target, sorted_idx[0], False)
-  #  print('Sorted Index', sorted_idx)
-  #  print('Sorted Names', sorted_names)
-    # worst
-    aucw, fprw, tprw, tprc, fprc = roc_calculator_num_v2(X, Y, target, sorted_idx[23], False)
-
-    #plt.plot(fprb, tprb,  # color='darkorange',
-    #         lw=lw, label='Best case Canvas - %s (area = %0.2f)' % (sorted_names[23],aucb,))
-
-    plt.plot(fprw, tprw,  # color='darkorange',
-             lw=lw, label='Worst case Canvas - %s (area = %0.2f)' % (sorted_names[0],aucw,))
-
-    #####################################################3333333
-
-    aucb, fprb, tprb,x , y , res = get_mean_exp_roc_num(t  ,False  , 1.0,True)
-    #res = np.mean(res)
-    cons_fpr[list_index], cons_tpr[list_index], cons_auc[list_index] = fprb, tprb , aucb
-    plt.plot(fprb, tprb,  color='black',
-             lw=lw, marker='x' , label='Wght. Log .Cons. (area = %0.2f)' %aucb)
-
-    plot_res(t,'Log Wght Cons', x,y,res )
-
-    residual_worksheet.write(excel_idx, 0, 'Log. Wght. Cons')
-    residual_worksheet.write(excel_idx, 1, res)
-    excel_idx += 1
-
-    plt.figure(10 + targets.index(t), figsize=(5, 5))
-
-    aucb, fprb, tprb,x , y , res = get_mean_exp_roc_num(t, False, 2.9 , True)
-
-    wcons_fpr[list_index], wcons_tpr[list_index], wcons_auc[list_index] = fprb, tprb, aucb
-    #res = np.mean(res)
-    plt.plot(fprb, tprb, color='red',
-             lw=lw, marker='P', label='Weigthed Consensus (area = %0.2f)' % aucb)
-    plot_res(t, 'Weigthed Consensus', x, y, res)
-
-    residual_worksheet.write(excel_idx, 0, 'Weigthed Consensus')
-    residual_worksheet.write(excel_idx, 1, res)
-    excel_idx += 1
-
-    plt.figure(10 + targets.index(t), figsize=(5, 5))
-
-
-    #plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r', alpha=.8)
-    plt.xlim([0.0, 1.0])
-    plt.ylim([-0.00, 1.005])
-    plt.title('ROC Compsrisson %s' % t)
-    plt.ylabel('True Positive Fraction')
-    plt.xlabel('False Positive Fraction')
-    plt.legend(loc="lower right")
-    #plt.grid(True)
-    plt.gcf().savefig('saved_figures/rocs/res_%s_%s' % (t, "comparisson"))
-    #plt.figure(100 + targets.index(t), figsize=(9, 9))
-
-    #tprs = []
-    #aucs = []
-    #mean_fpr = np.linspace(0, 1, 100)
-
-    #tprs.append(interp(mean_fpr, fpr, tpr))
-
-    for i in range(44):
-
-        perm = X[:, i + 1].argsort()
-        x, y ,rms = get_residues(t,np_arr[perm, 0],Y)
-        mnames = list(df.columns.values)
-
-        residual_worksheet.write(excel_idx, 0, mnames[2+i])
-        residual_worksheet.write(excel_idx, 1, rms)
-
-        plot_res(t, mnames[2+i] ,x, y, rms ,True)
-        excel_idx += 1
-
-
-#targets = ['CK1','DYRK1a','CDK5','GSK3b']
-for (t, list_index) in zip(targets,range(len(targets))):
-    plt.figure(250 + targets.index(t), figsize=(5, 5))
-
-    plt.plot(glide_fpr[list_index], glide_tpr[list_index],  # color='darkorange',
-                 lw=lw, label='Mean Glide (area = %0.2f)' % (glide_auc[list_index],))
-
-    plt.plot(vrocs_fpr[list_index], vrocs_tpr[list_index],  # color='darkorange',
-                 lw=lw, label='Mean Vrocs (area = %0.2f)' % (vrocs_auc[list_index],))
-
-    plt.plot(canvas_fpr[list_index], canvas_tpr[list_index],  # color='darkorange',
-                 lw=lw, label='Mean Canvas (area = %0.2f)' % (canvas_auc[list_index],))
-
-    plt.plot(cons_fpr[list_index], cons_tpr[list_index],  # color='darkorange',
-                 lw=lw, label='Wgt. Cons. (area = %0.2f)' % (cons_auc[list_index],))
-
-    plt.plot(wcons_fpr[list_index], wcons_tpr[list_index],  marker = 'x',# color='darkorange',
-                 lw=lw, label='Wgt. Log Cons (area = %0.2f)' % (wcons_auc[list_index],))
-
-
-    #plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r', alpha=.8)
-    plt.xlim([0.0, 1.0])
-    plt.ylim([-0.00, 1.005])
-    plt.title('ROC Comparisson %s' % t)
-    plt.ylabel('True Positive Fraction')
-    plt.xlabel('False Positive Fraction')
-    plt.legend(loc="lower right")
-    #plt.grid(True)
-    plt.gcf().savefig('saved_figures/rocs/res_%s_%s' % ('TOTAL_'+t, "comparisson"))
-
-def lcm(a, b):
-    """Compute the lowest common multiple of a and b"""
-    return a * b / gcd(a, b)
-from fractions import gcd
-
-gcd_num = lcm(len(glide_fpr[0]), len(glide_fpr[1]))
-gcd_num = lcm(gcd_num, len(glide_fpr[2]))
-gcd_num_2 = lcm(gcd_num, len(glide_fpr[3]))
-
-rep0 = gcd_num_2 / len(glide_fpr[0])
-rep1 = gcd_num_2 / len(glide_fpr[1])
-rep2 = gcd_num_2 / len(glide_fpr[2])
-rep3 = gcd_num_2 / len(glide_fpr[3])
-
-gcd_num = lcm(len(cons_fpr[0]), len(cons_fpr[1]))
-gcd_num = lcm(gcd_num, len(cons_fpr[2]))
-gcd_num_2 = lcm(gcd_num, len(cons_fpr[3]))
-
-repc0 = gcd_num_2 / len(cons_fpr[0])
-repc1 = gcd_num_2 / len(cons_fpr[1])
-repc2 = gcd_num_2 / len(cons_fpr[2])
-repc3 = gcd_num_2 / len(cons_fpr[3])
-
-gcd_num = lcm(len(wcons_fpr[0]), len(wcons_fpr[1]))
-gcd_num = lcm(gcd_num, len(wcons_fpr[2]))
-gcd_num_2 = lcm(gcd_num, len(wcons_fpr[3]))
-
-repcw0 = gcd_num_2 / len(wcons_fpr[0])
-repcw1 = gcd_num_2 / len(wcons_fpr[1])
-repcw2 = gcd_num_2 / len(wcons_fpr[2])
-repcw3 = gcd_num_2 / len(wcons_fpr[3])
-
-
-rep = [rep0, rep1, rep2, rep3]
-repc = [repc0, repc1, repc2, repc3]
-repcw = [repcw0, repcw1, repcw2, repcw3]
-
-for i in range (4):
-    glide_fpr[i], glide_tpr[i] = np.repeat(glide_fpr[i], rep[i]) ,  np.repeat(glide_tpr[i], rep[i])
-    vrocs_fpr[i], vrocs_tpr[i] = np.repeat(vrocs_fpr[i], rep[i]) ,  np.repeat(vrocs_tpr[i], rep[i])
-    canvas_fpr[i], canvas_tpr[i]=  np.repeat(canvas_fpr[i], rep[i]) ,  np.repeat(canvas_tpr[i], rep[i])
-    cons_fpr[i], cons_tpr[i]=  np.repeat(cons_fpr[i], repc[i]) ,  np.repeat(cons_tpr[i], repc[i])
-    wcons_fpr[i], wcons_tpr[i] = np.repeat(wcons_fpr[i], repcw[i]) ,  np.repeat(wcons_tpr[i], repcw[i])
-
-    #print(len(wcons_fpr[i]),len(cons_fpr[i]))
-
-#print(rep0,rep1,rep2)
-
-plt.figure(300 , figsize=(5, 5))
-
-plt.plot(np.mean(np.vstack(glide_fpr), axis = 0), np.mean(np.vstack(glide_tpr), axis = 0),  # color='darkorange',
-             lw=lw, label='Mean Glide (area = %0.2f)' % (np.mean(glide_auc, axis =0 )))
-
-plt.plot(np.mean(np.vstack(vrocs_fpr), axis = 0),np.mean(np.vstack( vrocs_tpr), axis = 0),  # color='darkorange',
-             lw=lw, label='Mean Vrocs (area = %0.2f)' % (np.mean(vrocs_auc, axis =0 )))
-
-plt.plot(np.mean(np.vstack(canvas_fpr), axis = 0), np.mean(np.vstack(canvas_tpr), axis = 0),  # color='darkorange',
-             lw=lw, label='Mean Canvas (area = %0.2f)' % (np.mean(canvas_auc, axis =0 )))
-
-plt.plot(np.mean(np.vstack(cons_fpr), axis = 0), np.mean(np.vstack(cons_tpr), axis = 0),  # color='darkorange',
-             lw=lw, label='Wgt. Cons. (area = %0.2f)' % (np.mean(cons_auc, axis =0 )))
-
-plt.plot(np.mean(np.vstack(wcons_fpr), axis = 0),np.mean(np.vstack( wcons_tpr), axis = 0),  marker = 'x',# color='darkorange',
-             lw=lw, label='Wgt. Log Cons (area = %0.2f)' % (np.mean(wcons_auc, axis =0 )))
-
-
-#plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r', alpha=.8)
-plt.xlim([0.0, 1.0])
-plt.ylim([-0.00, 1.005])
-plt.title('ROC Comparisson %s' % 'Averaged')
-plt.ylabel('True Positive Fraction')
-plt.xlabel('False Positive Fraction')
 plt.legend(loc="lower right")
-#plt.grid(True)
-plt.gcf().savefig('saved_figures/rocs/res_%s_%s' % ('TOTAL_'+'Averaged', "comparisson"))
-
-
-residual_workbook.close()
 plt.show()
-
-
-
-
+#roc_calculator(X, Y, target, method ,invert)
